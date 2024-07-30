@@ -1,6 +1,18 @@
 version: '3.9'
 
 services:
+  app:
+    image: ghcr.io/abgeo/pensions:latest
+    environment:
+      PENSIONS_USERNAME: <put-your-value-here>
+      PENSIONS_PASSWORD: <put-your-value-here>
+
+      DB_HOST: postgres
+      DB_USER: pensions
+      DB_PASSWORD: password
+      DB_NAME: pensions
+      DB_PORT: 5432
+
   postgres:
     image: postgres
     volumes:
