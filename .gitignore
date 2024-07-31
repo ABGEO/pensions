@@ -1,4 +1,5 @@
 .idea
 .DS_Store
 
+deploy/helm-chart/values-override.yaml
 .env

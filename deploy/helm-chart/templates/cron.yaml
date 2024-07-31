@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "pensions.fullname" . }}
+  labels:
+    {{- include "pensions.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: {{ include "pensions.fullname" . }}
+              {{- with .Values.podSecurityContext }}
+              securityContext:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              {{- with .Values.resources }}
+              resources:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              env:
+                - name: PENSIONS_USERNAME
+                  value: "{{ .Values.env.pensions.username }}"
+                - name: PENSIONS_PASSWORD
+                  value: "{{ .Values.env.pensions.password }}"
+                - name: DB_HOST
+                  value: "{{ .Values.env.db.host }}"
+                - name: DB_USER
+                  value: "{{ .Values.env.db.user }}"
+                - name: DB_PASSWORD
+                  value: "{{ .Values.env.db.password }}"
+                - name: DB_NAME
+                  value: "{{ .Values.env.db.name }}"
+                - name: DB_PORT
+                  value: "{{ .Values.env.db.port }}"
+                {{- range $key, $value := .Values.additionalEnv }}
+                - name: "{{ tpl $key $ }}"
+                  value: "{{ tpl (print $value) $ }}"
+                {{- end }}
+          restartPolicy: {{ .Values.restartPolicy }}
+          {{- with .Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
